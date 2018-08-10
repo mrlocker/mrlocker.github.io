@@ -29,7 +29,7 @@
 <meta property="og:site_name" content="This is Locker.">
 <meta property="og:description" content="图像检索是视觉处理的重要组成部分，在很多领域都有应用，例如：商品推荐,以图搜图等。 考虑到图像检索中向量的维度以及向量的数量，常用一些量化方法来对图像的特征向量进行降维和压缩表示． 这篇博客我们主要考虑乘积量化的方法，主要包括PQ, OPQ, LOPQ三种． CQ（Composite Quantization）也是一种新的量化方法，计划放到后面的单独一个文章中。">
 <meta property="og:locale" content="zh-Hans">
-<meta property="og:updated_time" content="2018-08-10T18:32:01.909Z">
+<meta property="og:updated_time" content="2018-08-10T19:02:54.166Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="图像搜索中的向量量化">
 <meta name="twitter:description" content="图像检索是视觉处理的重要组成部分，在很多领域都有应用，例如：商品推荐,以图搜图等。 考虑到图像检索中向量的维度以及向量的数量，常用一些量化方法来对图像的特征向量进行降维和压缩表示． 这篇博客我们主要考虑乘积量化的方法，主要包括PQ, OPQ, LOPQ三种． CQ（Composite Quantization）也是一种新的量化方法，计划放到后面的单独一个文章中。">
@@ -119,7 +119,7 @@
             <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="back">
                 <i class="icon icon-lg icon-chevron-left"></i>
             </a>
-            <input type="text" id="key" class="search-input" autocomplete="off" placeholder="Search">
+            <input type="text" id="key" class="search-input" autocomplete="off" placeholder="検索">
             <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="search">
                 <i class="icon icon-lg icon-search"></i>
             </a>
@@ -198,7 +198,7 @@
 <p>NN搜索的复杂度与图像数据库的大小和特征的维度紧密相关，具体复杂度为：$O(n*d)$。</p>
 <p>乘积量化（Product Quantization）是向量量化的一种，主要目的就是通过近似最近邻搜索来提升图像检索的效率。本文主要关注乘积量化的原理，包括PQ，OPQ，LOPQ三种乘积量化方法。</p>
 <p>乘积量化的思想简而言之可以理解成类似k-means聚类，准确的说k-means聚类是PQ的一种特例。通过将特征空间的所有特征进行聚类后，利用聚类对特征进行encoding量化后再进行NN搜索。只不过乘积量化是将特征空间进行维度切分后的聚类，通过各子空间的encoding来近似原特征空间的相似性。</p>
-<p>PQ一般都和inverted file搭配使用，通过inverted file将vertor组织成层级结构，先通过粗粒度的quantizer找到对应的桶，再利用PQ进行剩余残差的refine search。\</p>
+<p>PQ一般都和inverted file搭配使用，通过inverted file将vertor组织成层级结构，先通过粗粒度的quantizer找到对应的桶，再利用PQ进行剩余残差的refine search。</p>
 <h2 id="Product-Quantization"><a href="#Product-Quantization" class="headerlink" title="Product Quantization"></a>Product Quantization</h2><p>PQ方法的提出主要目的是为了解决NN中的”curse of dimensionality”问题。很多方法为了解决这一问题，退而求其次，采用ANN来得到近似结果，以求在quality和efficiency之间的trade-off。这些方法包括LSH，KD-trees等等。但是这些方法都忽视了内存的使用，尤其当需要基于L2距离进行重排时，如果对于访问速度有较高的要求，所有的索引向量必须都存在内存中。当图像的特征提取采用local descriptor并且数量很多时，这种方法对于大规模图像检索不适用。</p>
 <h3 id="向量量化"><a href="#向量量化" class="headerlink" title="向量量化"></a>向量量化</h3><p>向量量化的思想最早在信息论中，目的是reduce the cardinality of the representation space。quantizer就是将$D$dimension的向量x映射到$q(x) \in \mathcal{C} = {c_i; i \in \mathcal{I}}$。${c_i}$就是centroids，$\mathcal{C}$称作codebook。</p>
 <p>quantizer的性能是通过$x$与$q(x)$的均方误差来衡量的：</p>
@@ -262,7 +262,7 @@
     <div class="content">
         
 <span class="post-time">
-    Last updated: <time datetime="2018-08-10T18:32:01.909Z" itemprop="dateUpdated">2018-08-11 02:32:01</time>
+    最終更新：<time datetime="2018-08-10T19:02:54.166Z" itemprop="dateUpdated">2018-08-11 03:02:54</time>
 </span><br>
 
 
@@ -394,7 +394,7 @@
             
                 <span><a href="/atom.xml" target="_blank" class="rss" title="rss"><i class="icon icon-lg icon-rss"></i></a></span>
             
-            <span>This blog is licensed under a <a rel="license" href="https://creativecommons.org/licenses/by/4.0/">Creative Commons Attribution 4.0 International License</a>.</span>
+            <span>このブログの内容物は<a rel="license" href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.ja">クリエイティブ・コモンズ 表示 - 非営利 - 継承 4.0 国際ライセンスの下に提供されています</a></span>
         </p>
     </div>
     <div class="bottom">
