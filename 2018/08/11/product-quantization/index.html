@@ -1,0 +1,541 @@
+<!DOCTYPE html>
+<html>
+<head>
+    
+
+    
+
+    
+
+
+
+    <meta charset="utf-8">
+    
+    
+    
+    
+    <title>图像搜索中的向量量化 | This is Locker. | A Learner.</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    
+    <meta name="theme-color" content="#3F51B5">
+    
+    
+    <meta name="keywords" content="图像搜索,向量量化">
+    <meta name="description" content="图像检索是视觉处理的重要组成部分，在很多领域都有应用，例如：商品推荐,以图搜图等。 考虑到图像检索中向量的维度以及向量的数量，常用一些量化方法来对图像的特征向量进行降维和压缩表示． 这篇博客我们主要考虑乘积量化的方法，主要包括PQ, OPQ, LOPQ三种． CQ（Composite Quantization）也是一种新的量化方法，计划放到后面的单独一个文章中。">
+<meta name="keywords" content="图像搜索,向量量化">
+<meta property="og:type" content="article">
+<meta property="og:title" content="图像搜索中的向量量化">
+<meta property="og:url" content="http://yoursite.com/2018/08/11/product-quantization/index.html">
+<meta property="og:site_name" content="This is Locker.">
+<meta property="og:description" content="图像检索是视觉处理的重要组成部分，在很多领域都有应用，例如：商品推荐,以图搜图等。 考虑到图像检索中向量的维度以及向量的数量，常用一些量化方法来对图像的特征向量进行降维和压缩表示． 这篇博客我们主要考虑乘积量化的方法，主要包括PQ, OPQ, LOPQ三种． CQ（Composite Quantization）也是一种新的量化方法，计划放到后面的单独一个文章中。">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:updated_time" content="2018-08-10T18:32:01.909Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="图像搜索中的向量量化">
+<meta name="twitter:description" content="图像检索是视觉处理的重要组成部分，在很多领域都有应用，例如：商品推荐,以图搜图等。 考虑到图像检索中向量的维度以及向量的数量，常用一些量化方法来对图像的特征向量进行降维和压缩表示． 这篇博客我们主要考虑乘积量化的方法，主要包括PQ, OPQ, LOPQ三种． CQ（Composite Quantization）也是一种新的量化方法，计划放到后面的单独一个文章中。">
+    
+        <link rel="alternate" type="application/atom+xml" title="This is Locker." href="/atom.xml">
+    
+    <link rel="shortcut icon" href="/favicon.ico">
+    <link rel="stylesheet" href="//unpkg.com/hexo-theme-material-indigo@latest/css/style.css">
+    <script>window.lazyScripts=[]</script>
+
+    <!-- custom head -->
+    
+
+</head>
+
+<body>
+    <div id="loading" class="active"></div>
+
+    <aside id="menu" class="hide" >
+  <div class="inner flex-row-vertical">
+    <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="menu-off">
+        <i class="icon icon-lg icon-close"></i>
+    </a>
+    <div class="brand-wrap" style="background-image:url(/img/brand.jpg)">
+      <div class="brand">
+        <a href="/" class="avatar waves-effect waves-circle waves-light">
+          <img src="/img/avatar.jpg">
+        </a>
+        <hgroup class="introduce">
+          <h5 class="nickname">Mr Locker.</h5>
+          <a href="mailto:locker.fighter@gmail.com" title="locker.fighter@gmail.com" class="mail">locker.fighter@gmail.com</a>
+        </hgroup>
+      </div>
+    </div>
+    <div class="scroll-wrap flex-col">
+      <ul class="nav">
+        
+            <li class="waves-block waves-effect">
+              <a href="/"  >
+                <i class="icon icon-lg icon-home"></i>
+                主页
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/archives"  >
+                <i class="icon icon-lg icon-archives"></i>
+                Archives
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/tags"  >
+                <i class="icon icon-lg icon-tags"></i>
+                Tags
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/categories"  >
+                <i class="icon icon-lg icon-th-list"></i>
+                Categories
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="https://github.com/mrlocker" target="_blank" >
+                <i class="icon icon-lg icon-github"></i>
+                Github
+              </a>
+            </li>
+        
+      </ul>
+    </div>
+  </div>
+</aside>
+
+    <main id="main">
+        <header class="top-header" id="header">
+    <div class="flex-row">
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on" id="menu-toggle">
+          <i class="icon icon-lg icon-navicon"></i>
+        </a>
+        <div class="flex-col header-title ellipsis">图像搜索中的向量量化</div>
+        
+        <div class="search-wrap" id="search-wrap">
+            <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="back">
+                <i class="icon icon-lg icon-chevron-left"></i>
+            </a>
+            <input type="text" id="key" class="search-input" autocomplete="off" placeholder="検索">
+            <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="search">
+                <i class="icon icon-lg icon-search"></i>
+            </a>
+        </div>
+        
+        
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="menuShare">
+            <i class="icon icon-lg icon-share-alt"></i>
+        </a>
+        
+    </div>
+</header>
+<header class="content-header post-header">
+
+    <div class="container fade-scale">
+        <h1 class="title">图像搜索中的向量量化</h1>
+        <h5 class="subtitle">
+            
+                <time datetime="2018-08-10T17:54:43.000Z" itemprop="datePublished" class="page-time">
+  2018-08-11
+</time>
+
+
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/计算机视觉/">计算机视觉</a></li></ul>
+
+            
+        </h5>
+    </div>
+
+    
+
+
+</header>
+
+
+<div class="container body-wrap">
+    
+    <aside class="post-widget">
+        <nav class="post-toc-wrap post-toc-shrink" id="post-toc">
+            <h4>TOC</h4>
+            <ol class="post-toc"><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#Product-Quantization"><span class="post-toc-number">1.</span> <span class="post-toc-text">Product Quantization</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#向量量化"><span class="post-toc-number">1.1.</span> <span class="post-toc-text">向量量化</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#乘积量化"><span class="post-toc-number">1.2.</span> <span class="post-toc-text">乘积量化</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#Optimized-Product-Quantization"><span class="post-toc-number">1.3.</span> <span class="post-toc-text">Optimized Product Quantization</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#Non-Parametric"><span class="post-toc-number">1.4.</span> <span class="post-toc-text">Non-Parametric</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#Parametric"><span class="post-toc-number">1.5.</span> <span class="post-toc-text">Parametric</span></a></li></ol></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#Locally-Optimized-Product-Quantization"><span class="post-toc-number">2.</span> <span class="post-toc-text">Locally Optimized Product Quantization</span></a></li></ol>
+        </nav>
+    </aside>
+
+
+<article id="post-product-quantization"
+  class="post-article article-type-post fade" itemprop="blogPost">
+
+    <div class="post-card">
+        <h1 class="post-card-title">图像搜索中的向量量化</h1>
+        <div class="post-meta">
+            <time class="post-time" title="2018-08-11 01:54:43" datetime="2018-08-10T17:54:43.000Z"  itemprop="datePublished">2018-08-11</time>
+
+            
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/计算机视觉/">计算机视觉</a></li></ul>
+
+
+
+            
+<span id="busuanzi_container_page_pv" title="文章总阅读量" style='display:none'>
+    <i class="icon icon-eye icon-pr"></i><span id="busuanzi_value_page_pv"></span>
+</span>
+
+
+        </div>
+        <div class="post-content" id="post-content" itemprop="postContent">
+            <p>图像检索是视觉处理的重要组成部分，在很多领域都有应用，例如：商品推荐,以图搜图等。</p>
+<p>考虑到图像检索中向量的维度以及向量的数量，常用一些量化方法来对图像的特征向量进行降维和压缩表示．</p>
+<p>这篇博客我们主要考虑乘积量化的方法，主要包括PQ, OPQ, LOPQ三种．</p>
+<p>CQ（Composite Quantization）也是一种新的量化方法，计划放到后面的单独一个文章中。</p>
+<a id="more"></a>
+<p>图片检索的基本流程，主要分为Offline和Online两部分。Offline部分主要是提取图像库中图像数据特征，量化，建立索引；Online部分对于查询图进行相同的图像特征提取和量化后，通过索引进行ANN搜索，排序，输出检索结果。Online部分还可以包含检索后期处理，如匹配验证，查询扩展等操作。</p>
+<p>图像检索过程很大程度上借鉴文本检索的经验，将图像看做文档后，通过特征提取获取文档的“word”，然后建立word到图像的倒排索引。</p>
+<p>在图像检索中，搜索的准确率、搜索速度、存储使用情况是关乎性能的关键。由于在图像检索中采用的是NN(Nearest Neighbor)搜索，常采用欧氏距离来进行衡量：</p>
+<p>$$NN(x) = arg \min_{y \in \mathcal{Y}} ||x - y||^2$$</p>
+<p>NN搜索的复杂度与图像数据库的大小和特征的维度紧密相关，具体复杂度为：$O(n*d)$。</p>
+<p>乘积量化（Product Quantization）是向量量化的一种，主要目的就是通过近似最近邻搜索来提升图像检索的效率。本文主要关注乘积量化的原理，包括PQ，OPQ，LOPQ三种乘积量化方法。</p>
+<p>乘积量化的思想简而言之可以理解成类似k-means聚类，准确的说k-means聚类是PQ的一种特例。通过将特征空间的所有特征进行聚类后，利用聚类对特征进行encoding量化后再进行NN搜索。只不过乘积量化是将特征空间进行维度切分后的聚类，通过各子空间的encoding来近似原特征空间的相似性。</p>
+<p>PQ一般都和inverted file搭配使用，通过inverted file将vertor组织成层级结构，先通过粗粒度的quantizer找到对应的桶，再利用PQ进行剩余残差的refine search。\</p>
+<h2 id="Product-Quantization"><a href="#Product-Quantization" class="headerlink" title="Product Quantization"></a>Product Quantization</h2><p>PQ方法的提出主要目的是为了解决NN中的”curse of dimensionality”问题。很多方法为了解决这一问题，退而求其次，采用ANN来得到近似结果，以求在quality和efficiency之间的trade-off。这些方法包括LSH，KD-trees等等。但是这些方法都忽视了内存的使用，尤其当需要基于L2距离进行重排时，如果对于访问速度有较高的要求，所有的索引向量必须都存在内存中。当图像的特征提取采用local descriptor并且数量很多时，这种方法对于大规模图像检索不适用。</p>
+<h3 id="向量量化"><a href="#向量量化" class="headerlink" title="向量量化"></a>向量量化</h3><p>向量量化的思想最早在信息论中，目的是reduce the cardinality of the representation space。quantizer就是将$D$dimension的向量x映射到$q(x) \in \mathcal{C} = {c_i; i \in \mathcal{I}}$。${c_i}$就是centroids，$\mathcal{C}$称作codebook。</p>
+<p>quantizer的性能是通过$x$与$q(x)$的均方误差来衡量的：</p>
+<p>$$MSE(q) = E_x[d(q(x), x)^2] = \int p(x)d(q(x), x)^2dx$$</p>
+<p>而对于均方误差的优化可以利用Lloyd optimality conditions来进行迭代优化:</p>
+<ul>
+<li>量化的向量必须被量化到距它最近的centroid中;</li>
+<li>向量所属的centroid一定是这些向量的reconstruction时的期望。</li>
+</ul>
+<p>可以看出这两点就是k-means的过程,但<strong>当向量特征极多时,centroids相应的增加使得高维度,大规模的vector quantization不再可行。</strong></p>
+<h3 id="乘积量化"><a href="#乘积量化" class="headerlink" title="乘积量化"></a>乘积量化</h3><p>乘积量化的主要思想就是将原向量通过分解为多个子空间降维后再进行量化，量化后的子空间笛卡尔积具备和原空间相同规模的特征量化能力，然后再对各子空间通过Lloyd算法来减小各自的均方误差，例如可以各个子空间进行k-means聚类．</p>
+<p>乘积量化后，code length为$l = mlog_2k^*$。当$m=1$时，k-means是乘积量化的特例．</p>
+<blockquote>
+<p>It is better to use a small number of subquantizers with many centroids than having many subquantizers with few bits.<br>减少子空间数量，可以相应增加centroids数量．<br>建议为：$k=256，m=8$．</p>
+</blockquote>
+<p>在乘积量化后，原向量可以通过各个子空间所属的cluster来表示．而具体的cluster值可以表示为二进制形式即长度为上面提到的：log2k^*</p>
+<p>上述的过程即为PQ的量化过程，接下来谈谈量化后的搜索过程．</p>
+<p>在NN search时，有两种计算相似性距离的方法：</p>
+<ul>
+<li>对称距离计算(SDC)：将查询向量和图数据库向量都用quantizer进行量化表示再进行相似度计算；</li>
+<li>非对称距离计算(ADC)：查询不进行向量量化表示直接与数据库中的quantizer进行距离计算．</li>
+</ul>
+<blockquote>
+<p>The only advantage of SDC over ADC is to limit the memory usage associated with the queries, as the query vector is defined by a code.<br>This is most cases not relevant and one should then use the asymmetric version, which obtains a lower distance distortion for a similar complexity.</p>
+</blockquote>
+<p>ADC的均方距离误差(MSDE)与quantizer的均方误差(MSE)相比：MSDE &lt;= MSE</p>
+<p>通常情况下都采用ADC来计算相似性距离．</p>
+<p>在具体的实践中，查询向量x到其它量化向量的距离是通过查表来实现的，即先算出向量x的各个子空间到所有子空间的centroids的距离，然后在具体计算时，根据向量y的各子空间所属聚类，通过查表得到具体的相似距离值．例如，假设向量y包含４个子空间，表示为[12, 10, 5, 1]，则可以通过x的各个分量到对应子空间中的12, 10, 5, 1聚类centroids的距离之和得到最终的相似距离．</p>
+<p>考虑到当采用局部描述子进行图像检索时，暴力搜索效率低下，从PQ开始，向量量化一般搭配倒排索引文件使用．</p>
+<p>并且倒排索引文件并不直接对通过描述子得到的特征进行索引，而是对所有的描述子先做＂粗粒度＂索引（可以采用k-means），然后利用PQ对每一个粗粒度的centroid和原始向量的残差进行encode．<br>并且encode残差能够得到比原始向量更高的准确度,而且残差更偏向于unimodal的分布.<br>在每个list中的entry包含两部分：image的id，encode的值．</p>
+<p>在查询时，由于查询的nearest neighbor不一定能够量化到相同的centroid中,因此具体实践时常取w个最近邻的list.然后再扫描对应的w个list,得到最后的kNN结果.</p>
+<h3 id="Optimized-Product-Quantization"><a href="#Optimized-Product-Quantization" class="headerlink" title="Optimized Product Quantization"></a>Optimized Product Quantization</h3><p>通过上面的分析可以看出，PQ的主要目的是降维，而降维效果的好坏是通过distortion进行衡量的：</p>
+<p>$$\min_{C^1, \dots, C^M}\sum||x - c_{i(x)}^2|| s.t. c \in C^1 \times C^2 \dots \times C^M$$</p>
+<p>但是这种乘积量化的方法潜在的不足在于没有考虑数据的分布，各个子空间的划分完全与数据无关．</p>
+<p>PQ归根结底是通过centroids来对原向量的一种近似，如果不考虑子空间的划分情况也就忽略了近似效果的好坏．理想情况下，应该是像k-means一样，在＂密集＂的区域多一些centroids，稀疏的地方少一些．但PQ方法是比较均匀的切分，不能实现这一点．</p>
+<p>考虑到PQ的不足，OPQ（Optimized Product Quantization）方法被提出．</p>
+<p>先看一下OPQ方法的目标函数：</p>
+<p>$$\min_{R, C^1, \dots, C^M}\sum_x||x - c_{i(x)}||^2 s.t. Rc \in C^1 \times C^2 \dots \times C^M, R^TR = I$$</p>
+<p>可以看出，与PQ方法相比，目标函数多了一个矩阵R．而R主要作用在CodeBook上，能够对C的各个子空间维度，子空间的投影方向进行控制．</p>
+<blockquote>
+<p>可以简单理解为R对CodeBook进行了旋转．</p>
+</blockquote>
+<p>在对目标函数进行求解的过程中可以分为两种，一种是Non-Parametric的方法，一种是Parametric的方法，后一种假定了数据分布．</p>
+<h3 id="Non-Parametric"><a href="#Non-Parametric" class="headerlink" title="Non-Parametric"></a>Non-Parametric</h3><p>Non-Parametric中不考虑数据的分布，具体过程通过迭代优化R和C来求解．</p>
+<ul>
+<li>固定R求解C，该过程与PQ求解基本相同，只需将x和c都乘以R即可；</li>
+<li>固定C优化R，该过程可以转化后通过SVD分解求解；</li>
+</ul>
+<h3 id="Parametric"><a href="#Parametric" class="headerlink" title="Parametric"></a>Parametric</h3><p>Parametric中，假定数据服从高斯分布，然后通过Eigenvalue Allocation求解．</p>
+<blockquote>
+<p>Parametric和Non-Parametric可以混合使用，将Parametric作为Non-Parametric的初始值．</p>
+</blockquote>
+<h2 id="Locally-Optimized-Product-Quantization"><a href="#Locally-Optimized-Product-Quantization" class="headerlink" title="Locally Optimized Product Quantization"></a>Locally Optimized Product Quantization</h2><p>LOPQ是在OPQ基础上的进一步优化，OPQ仅考虑了CodeBook的旋转问题，LOPQ考虑的是每个子空间进行不同的旋转，目标函数为：</p>
+<p>$$\min \ sum_x \min_{c \in C}||z - Rc||^2 s.t. C = C^1 \times C^2 \dots \times C^M R^TR = I$$</p>
+<p>具体优化方法和OPQ相同．</p>
+
+        </div>
+
+        <blockquote class="post-copyright">
+    
+    <div class="content">
+        
+<span class="post-time">
+    最終更新：<time datetime="2018-08-10T18:32:01.909Z" itemprop="dateUpdated">2018-08-11 02:32:01</time>
+</span><br>
+
+
+        
+    </div>
+    
+    <footer>
+        <a href="http://yoursite.com">
+            <img src="/img/avatar.jpg" alt="Mr Locker.">
+            Mr Locker.
+        </a>
+    </footer>
+</blockquote>
+
+        
+
+
+        <div class="post-footer">
+            
+	<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/向量量化/">向量量化</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/图像搜索/">图像搜索</a></li></ul>
+
+
+            
+<div class="page-share-wrap">
+    
+
+<div class="page-share" id="pageShare">
+    <ul class="reset share-icons">
+      <li>
+        <a class="weibo share-sns" target="_blank" href="http://service.weibo.com/share/share.php?url=http://yoursite.com/2018/08/11/product-quantization/&title=《图像搜索中的向量量化》 — This is Locker.&pic=http://yoursite.com/img/avatar.jpg" data-title="微博">
+          <i class="icon icon-weibo"></i>
+        </a>
+      </li>
+      <li>
+        <a class="weixin share-sns wxFab" href="javascript:;" data-title="微信">
+          <i class="icon icon-weixin"></i>
+        </a>
+      </li>
+      <li>
+        <a class="qq share-sns" target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=http://yoursite.com/2018/08/11/product-quantization/&title=《图像搜索中的向量量化》 — This is Locker.&source=图像检索是视觉处理的重要组成部分，在很多领域都有应用，例如：商品推荐,以图搜图等。
+考虑到图像检索中向量的维度以及向量的数量，常用一些量化方法来对图像的特..." data-title=" QQ">
+          <i class="icon icon-qq"></i>
+        </a>
+      </li>
+      <li>
+        <a class="facebook share-sns" target="_blank" href="https://www.facebook.com/sharer/sharer.php?u=http://yoursite.com/2018/08/11/product-quantization/" data-title=" Facebook">
+          <i class="icon icon-facebook"></i>
+        </a>
+      </li>
+      <li>
+        <a class="twitter share-sns" target="_blank" href="https://twitter.com/intent/tweet?text=《图像搜索中的向量量化》 — This is Locker.&url=http://yoursite.com/2018/08/11/product-quantization/&via=http://yoursite.com" data-title=" Twitter">
+          <i class="icon icon-twitter"></i>
+        </a>
+      </li>
+      <li>
+        <a class="google share-sns" target="_blank" href="https://plus.google.com/share?url=http://yoursite.com/2018/08/11/product-quantization/" data-title=" Google+">
+          <i class="icon icon-google-plus"></i>
+        </a>
+      </li>
+    </ul>
+ </div>
+
+
+
+    <a href="javascript:;" id="shareFab" class="page-share-fab waves-effect waves-circle">
+        <i class="icon icon-share-alt icon-lg"></i>
+    </a>
+</div>
+
+
+
+        </div>
+    </div>
+
+    
+<nav class="post-nav flex-row flex-justify-between flex-row-reverse">
+  
+
+  
+    <div class="waves-block waves-effect next">
+      <a href="/2018/08/11/hello-world/" id="post-next" class="post-nav-link">
+        <div class="tips">Next <i class="icon icon-angle-right icon-lg icon-pl"></i></div>
+        <h4 class="title">Hello World</h4>
+      </a>
+    </div>
+  
+</nav>
+
+
+
+    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</article>
+
+
+
+</div>
+
+        <footer class="footer">
+    <div class="top">
+        
+<p>
+    <span id="busuanzi_container_site_uv" style='display:none'>
+        站点总访客数：<span id="busuanzi_value_site_uv"></span>
+    </span>
+    <span id="busuanzi_container_site_pv" style='display:none'>
+        站点总访问量：<span id="busuanzi_value_site_pv"></span>
+    </span>
+</p>
+
+
+        <p>
+            
+                <span><a href="/atom.xml" target="_blank" class="rss" title="rss"><i class="icon icon-lg icon-rss"></i></a></span>
+            
+            <span>このブログの内容物は<a rel="license" href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.ja">クリエイティブ・コモンズ 表示 - 非営利 - 継承 4.0 国際ライセンスの下に提供されています</a></span>
+        </p>
+    </div>
+    <div class="bottom">
+        <p><span>Mr Locker. &copy; 2015 - 2018</span>
+            <span>
+                
+                Power by <a href="http://hexo.io/" target="_blank">Hexo</a> Theme <a href="https://github.com/yscoder/hexo-theme-indigo" target="_blank">indigo</a>
+            </span>
+        </p>
+    </div>
+</footer>
+
+    </main>
+    <div class="mask" id="mask"></div>
+<a href="javascript:;" id="gotop" class="waves-effect waves-circle waves-light"><span class="icon icon-lg icon-chevron-up"></span></a>
+
+
+
+<div class="global-share" id="globalShare">
+    <ul class="reset share-icons">
+      <li>
+        <a class="weibo share-sns" target="_blank" href="http://service.weibo.com/share/share.php?url=http://yoursite.com/2018/08/11/product-quantization/&title=《图像搜索中的向量量化》 — This is Locker.&pic=http://yoursite.com/img/avatar.jpg" data-title="微博">
+          <i class="icon icon-weibo"></i>
+        </a>
+      </li>
+      <li>
+        <a class="weixin share-sns wxFab" href="javascript:;" data-title="微信">
+          <i class="icon icon-weixin"></i>
+        </a>
+      </li>
+      <li>
+        <a class="qq share-sns" target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=http://yoursite.com/2018/08/11/product-quantization/&title=《图像搜索中的向量量化》 — This is Locker.&source=图像检索是视觉处理的重要组成部分，在很多领域都有应用，例如：商品推荐,以图搜图等。
+考虑到图像检索中向量的维度以及向量的数量，常用一些量化方法来对图像的特..." data-title=" QQ">
+          <i class="icon icon-qq"></i>
+        </a>
+      </li>
+      <li>
+        <a class="facebook share-sns" target="_blank" href="https://www.facebook.com/sharer/sharer.php?u=http://yoursite.com/2018/08/11/product-quantization/" data-title=" Facebook">
+          <i class="icon icon-facebook"></i>
+        </a>
+      </li>
+      <li>
+        <a class="twitter share-sns" target="_blank" href="https://twitter.com/intent/tweet?text=《图像搜索中的向量量化》 — This is Locker.&url=http://yoursite.com/2018/08/11/product-quantization/&via=http://yoursite.com" data-title=" Twitter">
+          <i class="icon icon-twitter"></i>
+        </a>
+      </li>
+      <li>
+        <a class="google share-sns" target="_blank" href="https://plus.google.com/share?url=http://yoursite.com/2018/08/11/product-quantization/" data-title=" Google+">
+          <i class="icon icon-google-plus"></i>
+        </a>
+      </li>
+    </ul>
+ </div>
+
+
+<div class="page-modal wx-share" id="wxShare">
+    <a class="close" href="javascript:;"><i class="icon icon-close"></i></a>
+    <p>扫一扫，分享到微信</p>
+    <img src="//api.qrserver.com/v1/create-qr-code/?data=http://yoursite.com/2018/08/11/product-quantization/" alt="微信分享二维码">
+</div>
+
+
+
+
+    <script src="//cdn.bootcss.com/node-waves/0.7.4/waves.min.js"></script>
+<script>
+var BLOG = { ROOT: '/', SHARE: true, REWARD: false };
+
+
+</script>
+
+<script src="//unpkg.com/hexo-theme-material-indigo@latest/js/main.min.js"></script>
+
+
+<div class="search-panel" id="search-panel">
+    <ul class="search-result" id="search-result"></ul>
+</div>
+<template id="search-tpl">
+<li class="item">
+    <a href="{path}" class="waves-block waves-effect">
+        <div class="title ellipsis" title="{title}">{title}</div>
+        <div class="flex-row flex-middle">
+            <div class="tags ellipsis">
+                {tags}
+            </div>
+            <time class="flex-col time">{date}</time>
+        </div>
+    </a>
+</li>
+</template>
+
+<script src="//unpkg.com/hexo-theme-material-indigo@latest/js/search.min.js" async></script>
+
+
+
+<!-- mathjax config similar to math.stackexchange -->
+
+<script type="text/x-mathjax-config">
+MathJax.Hub.Config({
+    tex2jax: {
+        inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+        processEscapes: true,
+        skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+    }
+});
+
+MathJax.Hub.Queue(function() {
+    var all = MathJax.Hub.getAllJax(), i;
+    for(i=0; i < all.length; i += 1) {
+        all[i].SourceElement().parentNode.className += ' has-jax';
+    }
+});
+</script>
+
+<script async src="//cdn.bootcss.com/mathjax/2.7.0/MathJax.js?config=TeX-MML-AM_CHTML" async></script>
+
+
+
+
+<script async src="//dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+<script>
+(function() {
+    var OriginTitile = document.title, titleTime;
+    document.addEventListener('visibilitychange', function() {
+        if (document.hidden) {
+            document.title = '死鬼去哪里了！';
+            clearTimeout(titleTime);
+        } else {
+            document.title = '(つェ⊂)咦!又好了!';
+            titleTime = setTimeout(function() {
+                document.title = OriginTitile;
+            },2000);
+        }
+    });
+})();
+</script>
+
+
+
+</body>
+</html>
