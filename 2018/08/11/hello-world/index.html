@@ -195,16 +195,6 @@
 
         <blockquote class="post-copyright">
     
-    <div class="content">
-        
-<span class="post-time">
-    Last updated: <time datetime="2018-08-10T17:16:16.174Z" itemprop="dateUpdated">2018-08-11 01:16:16</time>
-</span><br>
-
-
-        
-    </div>
-    
     <footer>
         <a href="http://yoursite.com">
             <img src="/img/avatar.jpg" alt="Mr Locker.">
@@ -297,6 +287,30 @@
 
 
 
+
+    <!-- Valine Comments -->
+    <div class="comments vcomment" id="comments"></div>
+    <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+    <script src="//unpkg.com/valine@latest/dist/Valine.min.js"></script>
+    <!-- Valine Comments script -->
+    <script>
+        var GUEST_INFO = ['nick','mail','link'];
+        var guest_info = 'nick,mail,link'.split(',').filter(function(item){
+          return GUEST_INFO.indexOf(item) > -1
+        });
+        new Valine({
+            el: '#comments',
+            notify: 'false' == 'true',
+            verify: 'false' == 'true',
+            appId: "25gfpU9PXXfHpnY96dyaWNFo-gzGzoHsz",
+            appKey: "zKiJCzfEdkzxkOjKBU2tNWaG",
+            avatar: "mm",
+            placeholder: "请轻拍",
+            guest_info: guest_info.length == 0 ? GUEST_INFO : guest_info,
+            pageSize: "10"
+        })
+    </script>
+    <!-- Valine Comments end -->
 
 
 
