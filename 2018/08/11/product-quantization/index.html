@@ -29,10 +29,14 @@
 <meta property="og:site_name" content="This is Locker.">
 <meta property="og:description" content="图像检索是视觉处理的重要组成部分，在很多领域都有应用，例如：商品推荐,以图搜图等。 考虑到图像检索中向量的维度以及向量的数量，常用一些量化方法来对图像的特征向量进行降维和压缩表示． 这篇博客我们主要考虑乘积量化的方法，主要包括PQ, OPQ, LOPQ三种． CQ（Composite Quantization）也是一种新的量化方法，计划放到后面的单独一个文章中。">
 <meta property="og:locale" content="zh-Hans">
-<meta property="og:updated_time" content="2018-08-10T19:02:54.166Z">
+<meta property="og:image" content="http://yoursite.com/2018/08/11/product-quantization/product-quantization/sdc_adc.png">
+<meta property="og:image" content="http://yoursite.com/2018/08/11/product-quantization/product-quantization/index.png">
+<meta property="og:image" content="http://yoursite.com/2018/08/11/product-quantization/product-quantization/comparison.png">
+<meta property="og:updated_time" content="2018-08-11T14:38:07.604Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="图像搜索中的向量量化">
 <meta name="twitter:description" content="图像检索是视觉处理的重要组成部分，在很多领域都有应用，例如：商品推荐,以图搜图等。 考虑到图像检索中向量的维度以及向量的数量，常用一些量化方法来对图像的特征向量进行降维和压缩表示． 这篇博客我们主要考虑乘积量化的方法，主要包括PQ, OPQ, LOPQ三种． CQ（Composite Quantization）也是一种新的量化方法，计划放到后面的单独一个文章中。">
+<meta name="twitter:image" content="http://yoursite.com/2018/08/11/product-quantization/product-quantization/sdc_adc.png">
     
         <link rel="alternate" type="application/atom+xml" title="This is Locker." href="/atom.xml">
     
@@ -119,7 +123,7 @@
             <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="back">
                 <i class="icon icon-lg icon-chevron-left"></i>
             </a>
-            <input type="text" id="key" class="search-input" autocomplete="off" placeholder="検索">
+            <input type="text" id="key" class="search-input" autocomplete="off" placeholder="Search">
             <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="search">
                 <i class="icon icon-lg icon-search"></i>
             </a>
@@ -221,6 +225,13 @@
 <li>对称距离计算(SDC)：将查询向量和图数据库向量都用quantizer进行量化表示再进行相似度计算；</li>
 <li>非对称距离计算(ADC)：查询不进行向量量化表示直接与数据库中的quantizer进行距离计算．</li>
 </ul>
+<figure class="image-bubble">
+                <div class="img-lightbox">
+                    <div class="overlay"></div>
+                    <img src="product-quantization/sdc_adc.png" alt="对称距离、非对称距离对比" title="">
+                </div>
+                <div class="image-caption">对称距离、非对称距离对比</div>
+            </figure>
 <blockquote>
 <p>The only advantage of SDC over ADC is to limit the memory usage associated with the queries, as the query vector is defined by a code.<br>This is most cases not relevant and one should then use the asymmetric version, which obtains a lower distance distortion for a similar complexity.</p>
 </blockquote>
@@ -229,6 +240,13 @@
 <p>在具体的实践中，查询向量x到其它量化向量的距离是通过查表来实现的，即先算出向量x的各个子空间到所有子空间的centroids的距离，然后在具体计算时，根据向量y的各子空间所属聚类，通过查表得到具体的相似距离值．例如，假设向量y包含４个子空间，表示为[12, 10, 5, 1]，则可以通过x的各个分量到对应子空间中的12, 10, 5, 1聚类centroids的距离之和得到最终的相似距离．</p>
 <p>考虑到当采用局部描述子进行图像检索时，暴力搜索效率低下，从PQ开始，向量量化一般搭配倒排索引文件使用．</p>
 <p>并且倒排索引文件并不直接对通过描述子得到的特征进行索引，而是对所有的描述子先做＂粗粒度＂索引（可以采用k-means），然后利用PQ对每一个粗粒度的centroid和原始向量的残差进行encode．<br>并且encode残差能够得到比原始向量更高的准确度,而且残差更偏向于unimodal的分布.<br>在每个list中的entry包含两部分：image的id，encode的值．</p>
+<figure class="image-bubble">
+                <div class="img-lightbox">
+                    <div class="overlay"></div>
+                    <img src="product-quantization/index.png" alt="索引结构" title="">
+                </div>
+                <div class="image-caption">索引结构</div>
+            </figure>
 <p>在查询时，由于查询的nearest neighbor不一定能够量化到相同的centroid中,因此具体实践时常取w个最近邻的list.然后再扫描对应的w个list,得到最后的kNN结果.</p>
 <h3 id="Optimized-Product-Quantization"><a href="#Optimized-Product-Quantization" class="headerlink" title="Optimized Product Quantization"></a>Optimized Product Quantization</h3><p>通过上面的分析可以看出，PQ的主要目的是降维，而降维效果的好坏是通过distortion进行衡量的：</p>
 <p>$$\min_{C^1, \dots, C^M}\sum||x - c_{i(x)}^2|| s.t. c \in C^1 \times C^2 \dots \times C^M$$</p>
@@ -253,8 +271,14 @@
 </blockquote>
 <h2 id="Locally-Optimized-Product-Quantization"><a href="#Locally-Optimized-Product-Quantization" class="headerlink" title="Locally Optimized Product Quantization"></a>Locally Optimized Product Quantization</h2><p>LOPQ是在OPQ基础上的进一步优化，OPQ仅考虑了CodeBook的旋转问题，LOPQ考虑的是每个子空间进行不同的旋转，目标函数为：</p>
 <p>$$\min \ sum_x \min_{c \in C}||z - Rc||^2 s.t. C = C^1 \times C^2 \dots \times C^M R^TR = I$$</p>
-<p>具体优化方法和OPQ相同．</p>
-
+<p>具体优化方法和OPQ相同。</p>
+<figure class="image-bubble">
+                <div class="img-lightbox">
+                    <div class="overlay"></div>
+                    <img src="product-quantization/comparison.png" alt="PQ，OPQ，LOPQ等方法和k-means的对比" title="">
+                </div>
+                <div class="image-caption">PQ，OPQ，LOPQ等方法和k-means的对比</div>
+            </figure>
         </div>
 
         <blockquote class="post-copyright">
@@ -262,7 +286,7 @@
     <div class="content">
         
 <span class="post-time">
-    最終更新：<time datetime="2018-08-10T19:02:54.166Z" itemprop="dateUpdated">2018-08-11 03:02:54</time>
+    Last updated: <time datetime="2018-08-11T14:38:07.604Z" itemprop="dateUpdated">2018-08-11 22:38:07</time>
 </span><br>
 
 
@@ -394,7 +418,7 @@
             
                 <span><a href="/atom.xml" target="_blank" class="rss" title="rss"><i class="icon icon-lg icon-rss"></i></a></span>
             
-            <span>このブログの内容物は<a rel="license" href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.ja">クリエイティブ・コモンズ 表示 - 非営利 - 継承 4.0 国際ライセンスの下に提供されています</a></span>
+            <span>This blog is licensed under a <a rel="license" href="https://creativecommons.org/licenses/by/4.0/">Creative Commons Attribution 4.0 International License</a>.</span>
         </p>
     </div>
     <div class="bottom">
