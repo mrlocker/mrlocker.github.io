@@ -6,7 +6,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="http://yoursite.com/"/>
-  <updated>2018-08-11T14:41:45.663Z</updated>
+  <updated>2020-01-17T17:42:34.947Z</updated>
   <id>http://yoursite.com/</id>
   
   <author>
@@ -15,6 +15,51 @@
   </author>
   
   <generator uri="http://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>detectron2数据处理</title>
+    <link href="http://yoursite.com/2020/01/18/detectron2%E6%95%B0%E6%8D%AE%E5%A4%84%E7%90%86/"/>
+    <id>http://yoursite.com/2020/01/18/detectron2数据处理/</id>
+    <published>2020-01-17T17:31:45.000Z</published>
+    <updated>2020-01-17T17:42:34.947Z</updated>
+    
+    <content type="html"><![CDATA[<p>Detectron2是FAIR推出的一个目标检测框架，在Detectron的基础上进行了重新设计，基于pytorch。Detectron仅能接受COCO格式，Detectron2中能够接受其它形式的输入。这篇博客简要的介绍了VOC和COCO两种常见的目标检测数据标注格式。</p><a id="more"></a><h2 id="Pascal-VOC"><a href="#Pascal-VOC" class="headerlink" title="Pascal VOC"></a>Pascal VOC</h2><p>Pascal Voc标注存储成XML的形式，每个XML对应一张图片。<br>它包含图片的路径在<path></path>元素中，每个bbox存储在<object>元素中，举个例子。</object></p><figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">object</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">name</span>&gt;</span>fig<span class="tag">&lt;/<span class="name">name</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">pose</span>&gt;</span>Unspecified<span class="tag">&lt;/<span class="name">pose</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">truncated</span>&gt;</span>0<span class="tag">&lt;/<span class="name">truncated</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">difficult</span>&gt;</span>0<span class="tag">&lt;/<span class="name">difficult</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">bndbox</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">xmin</span>&gt;</span>256<span class="tag">&lt;/<span class="name">xmin</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">ymin</span>&gt;</span>27<span class="tag">&lt;/<span class="name">ymin</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">xmax</span>&gt;</span>381<span class="tag">&lt;/<span class="name">xmax</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">ymax</span>&gt;</span>192<span class="tag">&lt;/<span class="name">ymax</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">bndbox</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">object</span>&gt;</span></span><br></pre></td></tr></table></figure><h2 id="COCO"><a href="#COCO" class="headerlink" title="COCO"></a>COCO</h2><p>COCO的数据格式只是一个单独的JSON文件，对于所有数据集中的标注，或者每个数据集的切片各一个。</p><p>bbox表示为左上的坐标和box的宽高的形式，”bbox”:[x, y, width, height]。<br>举个例子，COCO的JSON文件包含1张图片，对应最顶层的”image”元素，3个类别在”categories”元素中，2个标注的bbox在”annotation”元素中。</p><figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">  <span class="attr">"type"</span>: <span class="string">"instances"</span>,</span><br><span class="line">  <span class="attr">"images"</span>: [</span><br><span class="line">    &#123;</span><br><span class="line">      <span class="attr">"file_name"</span>: <span class="string">"0.jpg"</span>,</span><br><span class="line">      <span class="attr">"height"</span>: <span class="number">600</span>,</span><br><span class="line">      <span class="attr">"width"</span>: <span class="number">800</span>,</span><br><span class="line">      <span class="attr">"id"</span>: <span class="number">0</span></span><br><span class="line">    &#125;</span><br><span class="line">  ],</span><br><span class="line">  <span class="attr">"categories"</span>: [</span><br><span class="line">    &#123;</span><br><span class="line">      <span class="attr">"supercategory"</span>: <span class="string">"none"</span>,</span><br><span class="line">      <span class="attr">"name"</span>: <span class="string">"date"</span>,</span><br><span class="line">      <span class="attr">"id"</span>: <span class="number">0</span></span><br><span class="line">    &#125;,</span><br><span class="line">    &#123;</span><br><span class="line">      <span class="attr">"supercategory"</span>: <span class="string">"none"</span>,</span><br><span class="line">      <span class="attr">"name"</span>: <span class="string">"hazelnut"</span>,</span><br><span class="line">      <span class="attr">"id"</span>: <span class="number">2</span></span><br><span class="line">    &#125;,</span><br><span class="line">    &#123;</span><br><span class="line">      <span class="attr">"supercategory"</span>: <span class="string">"none"</span>,</span><br><span class="line">      <span class="attr">"name"</span>: <span class="string">"fig"</span>,</span><br><span class="line">      <span class="attr">"id"</span>: <span class="number">1</span></span><br><span class="line">    &#125;</span><br><span class="line">  ],</span><br><span class="line">  <span class="attr">"annotations"</span>: [</span><br><span class="line">    &#123;</span><br><span class="line">      <span class="attr">"id"</span>: <span class="number">1</span>,</span><br><span class="line">      <span class="attr">"bbox"</span>: [</span><br><span class="line">        <span class="number">100</span>,</span><br><span class="line">        <span class="number">116</span>,</span><br><span class="line">        <span class="number">140</span>,</span><br><span class="line">        <span class="number">170</span></span><br><span class="line">      ],</span><br><span class="line">      <span class="attr">"image_id"</span>: <span class="number">0</span>,</span><br><span class="line">      <span class="attr">"segmentation"</span>: [],</span><br><span class="line">      <span class="attr">"ignore"</span>: <span class="number">0</span>,</span><br><span class="line">      <span class="attr">"area"</span>: <span class="number">23800</span>,</span><br><span class="line">      <span class="attr">"iscrowd"</span>: <span class="number">0</span>,</span><br><span class="line">      <span class="attr">"category_id"</span>: <span class="number">0</span></span><br><span class="line">    &#125;,</span><br><span class="line">    &#123;</span><br><span class="line">      <span class="attr">"id"</span>: <span class="number">2</span>,</span><br><span class="line">      <span class="attr">"bbox"</span>: [</span><br><span class="line">        <span class="number">321</span>,</span><br><span class="line">        <span class="number">320</span>,</span><br><span class="line">        <span class="number">142</span>,</span><br><span class="line">        <span class="number">102</span></span><br><span class="line">      ],</span><br><span class="line">      <span class="attr">"image_id"</span>: <span class="number">0</span>,</span><br><span class="line">      <span class="attr">"segmentation"</span>: [],</span><br><span class="line">      <span class="attr">"ignore"</span>: <span class="number">0</span>,</span><br><span class="line">      <span class="attr">"area"</span>: <span class="number">14484</span>,</span><br><span class="line">      <span class="attr">"iscrowd"</span>: <span class="number">0</span>,</span><br><span class="line">      <span class="attr">"category_id"</span>: <span class="number">0</span></span><br><span class="line">    &#125;</span><br><span class="line">  ]</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure><p>因此，对于Detectron而言，需要将数据格式从VOC转换为COCO的格式。</p>]]></content>
+    
+    <summary type="html">
+    
+      &lt;p&gt;Detectron2是FAIR推出的一个目标检测框架，在Detectron的基础上进行了重新设计，基于pytorch。Detectron仅能接受COCO格式，Detectron2中能够接受其它形式的输入。这篇博客简要的介绍了VOC和COCO两种常见的目标检测数据标注格式。&lt;/p&gt;
+    
+    </summary>
+    
+      <category term="计算机视觉" scheme="http://yoursite.com/categories/%E8%AE%A1%E7%AE%97%E6%9C%BA%E8%A7%86%E8%A7%89/"/>
+    
+    
+      <category term="目标检测" scheme="http://yoursite.com/tags/%E7%9B%AE%E6%A0%87%E6%A3%80%E6%B5%8B/"/>
+    
+      <category term="深度学习" scheme="http://yoursite.com/tags/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>Hello World</title>
+    <link href="http://yoursite.com/2020/01/18/hello-world/"/>
+    <id>http://yoursite.com/2020/01/18/hello-world/</id>
+    <published>2020-01-17T17:23:49.168Z</published>
+    <updated>2018-08-10T17:16:16.174Z</updated>
+    
+    <content type="html"><![CDATA[<p>Welcome to <a href="https://hexo.io/" target="_blank" rel="noopener">Hexo</a>! This is your very first post. Check <a href="https://hexo.io/docs/" target="_blank" rel="noopener">documentation</a> for more info. If you get any problems when using Hexo, you can find the answer in <a href="https://hexo.io/docs/troubleshooting.html" target="_blank" rel="noopener">troubleshooting</a> or you can ask me on <a href="https://github.com/hexojs/hexo/issues" target="_blank" rel="noopener">GitHub</a>.</p><h2 id="Quick-Start"><a href="#Quick-Start" class="headerlink" title="Quick Start"></a>Quick Start</h2><h3 id="Create-a-new-post"><a href="#Create-a-new-post" class="headerlink" title="Create a new post"></a>Create a new post</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo new <span class="string">"My New Post"</span></span><br></pre></td></tr></table></figure><p>More info: <a href="https://hexo.io/docs/writing.html" target="_blank" rel="noopener">Writing</a></p><h3 id="Run-server"><a href="#Run-server" class="headerlink" title="Run server"></a>Run server</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo server</span><br></pre></td></tr></table></figure><p>More info: <a href="https://hexo.io/docs/server.html" target="_blank" rel="noopener">Server</a></p><h3 id="Generate-static-files"><a href="#Generate-static-files" class="headerlink" title="Generate static files"></a>Generate static files</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo generate</span><br></pre></td></tr></table></figure><p>More info: <a href="https://hexo.io/docs/generating.html" target="_blank" rel="noopener">Generating</a></p><h3 id="Deploy-to-remote-sites"><a href="#Deploy-to-remote-sites" class="headerlink" title="Deploy to remote sites"></a>Deploy to remote sites</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo deploy</span><br></pre></td></tr></table></figure><p>More info: <a href="https://hexo.io/docs/deployment.html" target="_blank" rel="noopener">Deployment</a></p>]]></content>
+    
+    <summary type="html">
+    
+      
+      
+        &lt;p&gt;Welcome to &lt;a href=&quot;https://hexo.io/&quot; target=&quot;_blank&quot; rel=&quot;noopener&quot;&gt;Hexo&lt;/a&gt;! This is your very first post. Check &lt;a href=&quot;https://hexo.
+      
+    
+    </summary>
+    
+    
+  </entry>
   
   <entry>
     <title>图像搜索中的向量量化</title>
@@ -40,27 +85,6 @@
       <category term="图像搜索" scheme="http://yoursite.com/tags/%E5%9B%BE%E5%83%8F%E6%90%9C%E7%B4%A2/"/>
     
       <category term="向量量化" scheme="http://yoursite.com/tags/%E5%90%91%E9%87%8F%E9%87%8F%E5%8C%96/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>Hello World</title>
-    <link href="http://yoursite.com/2018/08/11/hello-world/"/>
-    <id>http://yoursite.com/2018/08/11/hello-world/</id>
-    <published>2018-08-10T17:16:16.174Z</published>
-    <updated>2018-08-10T17:16:16.174Z</updated>
-    
-    <content type="html"><![CDATA[<p>Welcome to <a href="https://hexo.io/" target="_blank" rel="noopener">Hexo</a>! This is your very first post. Check <a href="https://hexo.io/docs/" target="_blank" rel="noopener">documentation</a> for more info. If you get any problems when using Hexo, you can find the answer in <a href="https://hexo.io/docs/troubleshooting.html" target="_blank" rel="noopener">troubleshooting</a> or you can ask me on <a href="https://github.com/hexojs/hexo/issues" target="_blank" rel="noopener">GitHub</a>.</p><h2 id="Quick-Start"><a href="#Quick-Start" class="headerlink" title="Quick Start"></a>Quick Start</h2><h3 id="Create-a-new-post"><a href="#Create-a-new-post" class="headerlink" title="Create a new post"></a>Create a new post</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo new <span class="string">"My New Post"</span></span><br></pre></td></tr></table></figure><p>More info: <a href="https://hexo.io/docs/writing.html" target="_blank" rel="noopener">Writing</a></p><h3 id="Run-server"><a href="#Run-server" class="headerlink" title="Run server"></a>Run server</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo server</span><br></pre></td></tr></table></figure><p>More info: <a href="https://hexo.io/docs/server.html" target="_blank" rel="noopener">Server</a></p><h3 id="Generate-static-files"><a href="#Generate-static-files" class="headerlink" title="Generate static files"></a>Generate static files</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo generate</span><br></pre></td></tr></table></figure><p>More info: <a href="https://hexo.io/docs/generating.html" target="_blank" rel="noopener">Generating</a></p><h3 id="Deploy-to-remote-sites"><a href="#Deploy-to-remote-sites" class="headerlink" title="Deploy to remote sites"></a>Deploy to remote sites</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo deploy</span><br></pre></td></tr></table></figure><p>More info: <a href="https://hexo.io/docs/deployment.html" target="_blank" rel="noopener">Deployment</a></p>]]></content>
-    
-    <summary type="html">
-    
-      
-      
-        &lt;p&gt;Welcome to &lt;a href=&quot;https://hexo.io/&quot; target=&quot;_blank&quot; rel=&quot;noopener&quot;&gt;Hexo&lt;/a&gt;! This is your very first post. Check &lt;a href=&quot;https://hexo.
-      
-    
-    </summary>
-    
     
   </entry>
   
