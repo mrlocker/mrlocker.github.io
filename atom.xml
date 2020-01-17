@@ -6,7 +6,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="http://yoursite.com/"/>
-  <updated>2019-07-24T16:42:22.725Z</updated>
+  <updated>2019-08-09T16:08:26.518Z</updated>
   <id>http://yoursite.com/</id>
   
   <author>
@@ -21,9 +21,9 @@
     <link href="http://yoursite.com/2019/07/25/deemo/"/>
     <id>http://yoursite.com/2019/07/25/deemo/</id>
     <published>2019-07-24T16:30:39.000Z</published>
-    <updated>2019-07-24T16:42:22.725Z</updated>
+    <updated>2019-08-09T16:08:26.518Z</updated>
     
-    <content type="html"><![CDATA[<p>长久以来一直想自己动手实现一些基础网络，一来加深理解，二来可以逐步搭建一个可以自己使用的深度学习库。理想很丰满，现实很骨感，一直没有抽出时间做这个事情，今天终于下定决心开始这个持久的Toy Project。项目取名Deemo（<em>Dee</em>p Neural Network De<em>mo</em>）</p><p>也不知道自己能实现几个网络，会不会半途而废，权当做一个兴趣爱好。总也不开始便永远不会开始，谨以此记作为开篇。</p><p>计划在后续的实现中会包括常见的分类网络、检测网络、分割网络等等，初步计划先从Resnet和Faster-RCNN开始，毕竟两者是经久不衰的经典网络。计划采用的结构是从网络原理介绍，到具体实现思路（包括部分核心代码分析），再到总结。当然，实现过程中肯定要参考各路大神的已有工作，多多学习，多多学习。</p><p>OK，废话不多说，本篇博客就先从ResNet的实现开始。</p><a id="more"></a>]]></content>
+    <content type="html"><![CDATA[<p>长久以来一直想自己动手实现一些基础网络，一来加深理解，二来可以逐步搭建一个可以自己使用的深度学习库。理想很丰满，现实很骨感，一直没有抽出时间做这个事情，今天终于下定决心开始这个持久的Toy Project。项目取名Deemo（<em>Dee</em>p Neural Network De<em>mo</em>）</p><p>也不知道自己能实现几个网络，会不会半途而废，权当做一个兴趣爱好。总也不开始便永远不会开始，谨以此记作为开篇。</p><p>计划在后续的实现中会包括常见的分类网络、检测网络、分割网络等等，初步计划先从Resnet和Faster-RCNN开始，毕竟两者是经久不衰的经典网络。计划采用的结构是从网络原理介绍，到具体实现思路（包括部分核心代码分析），再到总结。当然，实现过程中肯定要参考各路大神的已有工作，多多学习，多多学习。</p><p>OK，废话不多说，本篇博客就先从ResNet的实现开始。</p><a id="more"></a><h2 id="ResNet是什么"><a href="#ResNet是什么" class="headerlink" title="ResNet是什么"></a>ResNet是什么</h2><p>ResNet是Kaiming He大神在2015年12月发表的文章，主要目的是通过深度差网络解决训练过程中梯度消失的问题。</p>]]></content>
     
     <summary type="html">
     

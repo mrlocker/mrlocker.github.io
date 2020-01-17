@@ -29,7 +29,7 @@
 <meta property="og:site_name" content="This is Locker.">
 <meta property="og:description" content="长久以来一直想自己动手实现一些基础网络，一来加深理解，二来可以逐步搭建一个可以自己使用的深度学习库。理想很丰满，现实很骨感，一直没有抽出时间做这个事情，今天终于下定决心开始这个持久的Toy Project。项目取名Deemo（Deep Neural Network Demo） 也不知道自己能实现几个网络，会不会半途而废，权当做一个兴趣爱好。总也不开始便永远不会开始，谨以此记作为开篇。 计划在后续的">
 <meta property="og:locale" content="zh-Hans">
-<meta property="og:updated_time" content="2019-07-24T16:42:22.725Z">
+<meta property="og:updated_time" content="2019-08-09T16:08:26.518Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="deemo - 纸上得来终觉浅，绝知此事要躬行">
 <meta name="twitter:description" content="长久以来一直想自己动手实现一些基础网络，一来加深理解，二来可以逐步搭建一个可以自己使用的深度学习库。理想很丰满，现实很骨感，一直没有抽出时间做这个事情，今天终于下定决心开始这个持久的Toy Project。项目取名Deemo（Deep Neural Network Demo） 也不知道自己能实现几个网络，会不会半途而废，权当做一个兴趣爱好。总也不开始便永远不会开始，谨以此记作为开篇。 计划在后续的">
@@ -119,7 +119,7 @@
             <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="back">
                 <i class="icon icon-lg icon-chevron-left"></i>
             </a>
-            <input type="text" id="key" class="search-input" autocomplete="off" placeholder="検索">
+            <input type="text" id="key" class="search-input" autocomplete="off" placeholder="Search">
             <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="search">
                 <i class="icon icon-lg icon-search"></i>
             </a>
@@ -157,6 +157,13 @@
 
 <div class="container body-wrap">
     
+    <aside class="post-widget">
+        <nav class="post-toc-wrap post-toc-shrink" id="post-toc">
+            <h4>TOC</h4>
+            <ol class="post-toc"><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#ResNet是什么"><span class="post-toc-number">1.</span> <span class="post-toc-text">ResNet是什么</span></a></li></ol>
+        </nav>
+    </aside>
+
 
 <article id="post-deemo"
   class="post-article article-type-post fade" itemprop="blogPost">
@@ -184,6 +191,7 @@
 <p>计划在后续的实现中会包括常见的分类网络、检测网络、分割网络等等，初步计划先从Resnet和Faster-RCNN开始，毕竟两者是经久不衰的经典网络。计划采用的结构是从网络原理介绍，到具体实现思路（包括部分核心代码分析），再到总结。当然，实现过程中肯定要参考各路大神的已有工作，多多学习，多多学习。</p>
 <p>OK，废话不多说，本篇博客就先从ResNet的实现开始。</p>
 <a id="more"></a>
+<h2 id="ResNet是什么"><a href="#ResNet是什么" class="headerlink" title="ResNet是什么"></a>ResNet是什么</h2><p>ResNet是Kaiming He大神在2015年12月发表的文章，主要目的是通过深度差网络解决训练过程中梯度消失的问题。</p>
 
         </div>
 
@@ -337,11 +345,11 @@
             
                 <span><a href="/atom.xml" target="_blank" class="rss" title="rss"><i class="icon icon-lg icon-rss"></i></a></span>
             
-            <span>このブログの内容物は<a rel="license" href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.ja">クリエイティブ・コモンズ 表示 - 非営利 - 継承 4.0 国際ライセンスの下に提供されています</a></span>
+            <span>This blog is licensed under a <a rel="license" href="https://creativecommons.org/licenses/by/4.0/">Creative Commons Attribution 4.0 International License</a>.</span>
         </p>
     </div>
     <div class="bottom">
-        <p><span>Mr Locker. &copy; 2015 - 2019</span>
+        <p><span>Mr Locker. &copy; 2015 - 2020</span>
             <span>
                 
                 Power by <a href="http://hexo.io/" target="_blank">Hexo</a> Theme <a href="https://github.com/yscoder/hexo-theme-indigo" target="_blank">indigo</a>
