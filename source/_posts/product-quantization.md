@@ -1,0 +1,138 @@
+---
+title: 图像搜索中的向量量化
+date: 2018-08-11 01:54:43
+categories: 计算机视觉
+tags: 
+	- 图像搜索
+	- 向量量化
+mathjax: true
+---
+图像检索是视觉处理的重要组成部分，在很多领域都有应用，例如：商品推荐,以图搜图等。
+
+考虑到图像检索中向量的维度以及向量的数量，常用一些量化方法来对图像的特征向量进行降维和压缩表示．
+
+这篇博客我们主要考虑乘积量化的方法，主要包括PQ, OPQ, LOPQ三种．
+
+CQ（Composite Quantization）也是一种新的量化方法，计划放到后面的单独一个文章中。
+
+<!--more-->
+
+图片检索的基本流程，主要分为Offline和Online两部分。Offline部分主要是提取图像库中图像数据特征，量化，建立索引；Online部分对于查询图进行相同的图像特征提取和量化后，通过索引进行ANN搜索，排序，输出检索结果。Online部分还可以包含检索后期处理，如匹配验证，查询扩展等操作。
+
+图像检索过程很大程度上借鉴文本检索的经验，将图像看做文档后，通过特征提取获取文档的“word”，然后建立word到图像的倒排索引。
+
+在图像检索中，搜索的准确率、搜索速度、存储使用情况是关乎性能的关键。由于在图像检索中采用的是NN(Nearest Neighbor)搜索，常采用欧氏距离来进行衡量：
+
+$$NN(x) = arg \min_{y \in \mathcal{Y}} ||x - y||^2$$
+
+NN搜索的复杂度与图像数据库的大小和特征的维度紧密相关，具体复杂度为：$O(n*d)$。
+
+乘积量化（Product Quantization）是向量量化的一种，主要目的就是通过近似最近邻搜索来提升图像检索的效率。本文主要关注乘积量化的原理，包括PQ，OPQ，LOPQ三种乘积量化方法。
+
+乘积量化的思想简而言之可以理解成类似k-means聚类，准确的说k-means聚类是PQ的一种特例。通过将特征空间的所有特征进行聚类后，利用聚类对特征进行encoding量化后再进行NN搜索。只不过乘积量化是将特征空间进行维度切分后的聚类，通过各子空间的encoding来近似原特征空间的相似性。
+
+PQ一般都和inverted file搭配使用，通过inverted file将vertor组织成层级结构，先通过粗粒度的quantizer找到对应的桶，再利用PQ进行剩余残差的refine search。
+
+## Product Quantization
+
+PQ方法的提出主要目的是为了解决NN中的”curse of dimensionality”问题。很多方法为了解决这一问题，退而求其次，采用ANN来得到近似结果，以求在quality和efficiency之间的trade-off。这些方法包括LSH，KD-trees等等。但是这些方法都忽视了内存的使用，尤其当需要基于L2距离进行重排时，如果对于访问速度有较高的要求，所有的索引向量必须都存在内存中。当图像的特征提取采用local descriptor并且数量很多时，这种方法对于大规模图像检索不适用。
+
+### 向量量化
+
+向量量化的思想最早在信息论中，目的是reduce the cardinality of the representation space。quantizer就是将$D$dimension的向量x映射到$q(x) \in \mathcal{C} = \{c_i; i \in \mathcal{I}\}$。$\{c_i\}$就是centroids，$\mathcal{C}$称作codebook。
+
+quantizer的性能是通过$x$与$q(x)$的均方误差来衡量的：
+
+$$MSE(q) = E_x[d(q(x), x)^2] = \int p(x)d(q(x), x)^2dx$$
+
+而对于均方误差的优化可以利用Lloyd optimality conditions来进行迭代优化:
+
+ - 量化的向量必须被量化到距它最近的centroid中;
+ - 向量所属的centroid一定是这些向量的reconstruction时的期望。
+
+可以看出这两点就是k-means的过程,但**当向量特征极多时,centroids相应的增加使得高维度,大规模的vector quantization不再可行。**
+
+### 乘积量化
+
+乘积量化的主要思想就是将原向量通过分解为多个子空间降维后再进行量化，量化后的子空间笛卡尔积具备和原空间相同规模的特征量化能力，然后再对各子空间通过Lloyd算法来减小各自的均方误差，例如可以各个子空间进行k-means聚类．
+
+乘积量化后，code length为$l = mlog_2k^*$。当$m=1$时，k-means是乘积量化的特例．
+
+> It is better to use a small number of subquantizers with many centroids than having many subquantizers with few bits.
+> 减少子空间数量，可以相应增加centroids数量．
+> 建议为：$k=256，m=8$．
+
+在乘积量化后，原向量可以通过各个子空间所属的cluster来表示．而具体的cluster值可以表示为二进制形式即长度为上面提到的：log2k^*
+
+上述的过程即为PQ的量化过程，接下来谈谈量化后的搜索过程．
+
+在NN search时，有两种计算相似性距离的方法：
+
+- 对称距离计算(SDC)：将查询向量和图数据库向量都用quantizer进行量化表示再进行相似度计算；
+- 非对称距离计算(ADC)：查询不进行向量量化表示直接与数据库中的quantizer进行距离计算．
+
+![对称距离、非对称距离对比](sdc_adc.png)
+
+> The only advantage of SDC over ADC is to limit the memory usage associated with the queries, as the query vector is defined by a code.
+> This is most cases not relevant and one should then use the asymmetric version, which obtains a lower distance distortion for a similar complexity.
+
+ADC的均方距离误差(MSDE)与quantizer的均方误差(MSE)相比：MSDE <= MSE
+
+通常情况下都采用ADC来计算相似性距离．
+
+在具体的实践中，查询向量x到其它量化向量的距离是通过查表来实现的，即先算出向量x的各个子空间到所有子空间的centroids的距离，然后在具体计算时，根据向量y的各子空间所属聚类，通过查表得到具体的相似距离值．例如，假设向量y包含４个子空间，表示为[12, 10, 5, 1]，则可以通过x的各个分量到对应子空间中的12, 10, 5, 1聚类centroids的距离之和得到最终的相似距离．
+
+考虑到当采用局部描述子进行图像检索时，暴力搜索效率低下，从PQ开始，向量量化一般搭配倒排索引文件使用．
+
+并且倒排索引文件并不直接对通过描述子得到的特征进行索引，而是对所有的描述子先做＂粗粒度＂索引（可以采用k-means），然后利用PQ对每一个粗粒度的centroid和原始向量的残差进行encode．
+并且encode残差能够得到比原始向量更高的准确度,而且残差更偏向于unimodal的分布.
+在每个list中的entry包含两部分：image的id，encode的值．
+
+![索引结构](index.png)
+
+在查询时，由于查询的nearest neighbor不一定能够量化到相同的centroid中,因此具体实践时常取w个最近邻的list.然后再扫描对应的w个list,得到最后的kNN结果.
+
+### Optimized Product Quantization
+
+通过上面的分析可以看出，PQ的主要目的是降维，而降维效果的好坏是通过distortion进行衡量的：
+
+$$\min_{C^1, \dots, C^M}\sum||x - c_{i(x)}^2|| s.t. c \in C^1 \times C^2 \dots \times C^M$$
+
+但是这种乘积量化的方法潜在的不足在于没有考虑数据的分布，各个子空间的划分完全与数据无关．
+
+PQ归根结底是通过centroids来对原向量的一种近似，如果不考虑子空间的划分情况也就忽略了近似效果的好坏．理想情况下，应该是像k-means一样，在＂密集＂的区域多一些centroids，稀疏的地方少一些．但PQ方法是比较均匀的切分，不能实现这一点．
+
+考虑到PQ的不足，OPQ（Optimized Product Quantization）方法被提出．
+
+先看一下OPQ方法的目标函数：
+
+$$\min_{R, C^1, \dots, C^M}\sum_x||x - c_{i(x)}||^2 s.t. Rc \in C^1 \times C^2 \dots \times C^M, R^TR = I$$
+
+可以看出，与PQ方法相比，目标函数多了一个矩阵R．而R主要作用在CodeBook上，能够对C的各个子空间维度，子空间的投影方向进行控制．
+
+> 可以简单理解为R对CodeBook进行了旋转．
+
+在对目标函数进行求解的过程中可以分为两种，一种是Non-Parametric的方法，一种是Parametric的方法，后一种假定了数据分布．
+
+### Non-Parametric
+
+Non-Parametric中不考虑数据的分布，具体过程通过迭代优化R和C来求解．
+
+- 固定R求解C，该过程与PQ求解基本相同，只需将x和c都乘以R即可；
+- 固定C优化R，该过程可以转化后通过SVD分解求解；
+
+### Parametric
+
+Parametric中，假定数据服从高斯分布，然后通过Eigenvalue Allocation求解．
+
+> Parametric和Non-Parametric可以混合使用，将Parametric作为Non-Parametric的初始值．
+
+## Locally Optimized Product Quantization
+
+LOPQ是在OPQ基础上的进一步优化，OPQ仅考虑了CodeBook的旋转问题，LOPQ考虑的是每个子空间进行不同的旋转，目标函数为：
+
+$$\min \ sum_x \min_{c \in C}||z - Rc||^2 s.t. C = C^1 \times C^2 \dots \times C^M R^TR = I$$
+
+具体优化方法和OPQ相同。
+
+![PQ，OPQ，LOPQ等方法和k-means的对比](comparison.png)
